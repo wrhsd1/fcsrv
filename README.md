@@ -22,6 +22,7 @@ Currently supports the following models:
 - `penguin`
 - `shadows`
 - `BrokenJigsawbrokenjigsaw_swapl`
+- `frankenhead`
 
 ### Usage
 
