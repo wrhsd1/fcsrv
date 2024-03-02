@@ -17,12 +17,12 @@ fn main() {
     })
     .unwrap();
 
-    let predictor = fcsrv::model::get_predictor(ModelType::Frankenhead).unwrap();
+    let predictor = fcsrv::model::get_predictor(ModelType::Counting).unwrap();
 
     let image_file =
-        std::fs::read("images/frankenhead/0a645367c6d7857122a66b43e9cb6e1d.jpg").unwrap();
+        std::fs::read("images/counting/0a1d5e94-8187-4124-a999-3ab7af6cb5e3.jpg").unwrap();
     let guess = predictor
         .predict(image::load_from_memory(&image_file).unwrap())
         .unwrap();
-    assert_eq!(guess, 4);
+    assert_eq!(guess, 0);
 }

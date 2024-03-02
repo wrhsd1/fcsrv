@@ -2,6 +2,7 @@ mod base;
 #[allow(non_snake_case)]
 mod brokenJigsawbrokenjigsaw_swap;
 mod coordinatesmatch;
+mod counting;
 mod frankenhead;
 mod hopscotch_highsec;
 mod image_processing;
@@ -12,10 +13,10 @@ mod train_coordinates;
 
 use self::{
     brokenJigsawbrokenjigsaw_swap::BrokenJigsawbrokenjigsaw_swap,
-    coordinatesmatch::CoordinatesMatchPredictor, frankenhead::FrankenheadPredictor,
-    hopscotch_highsec::HopscotchHighsecPredictor, m3d_rollball_objects::M3DRotationPredictor,
-    penguin::PenguinPredictor, shadows::ShadowsPredictor,
-    train_coordinates::TrainCoordinatesPredictor,
+    coordinatesmatch::CoordinatesMatchPredictor, counting::CountingPredictor,
+    frankenhead::FrankenheadPredictor, hopscotch_highsec::HopscotchHighsecPredictor,
+    m3d_rollball_objects::M3DRotationPredictor, penguin::PenguinPredictor,
+    shadows::ShadowsPredictor, train_coordinates::TrainCoordinatesPredictor,
 };
 use crate::BootArgs;
 use anyhow::Result;
@@ -32,6 +33,7 @@ static SHADOWS_PREDICTOR: OnceCell<ShadowsPredictor> = OnceCell::const_new();
 static BROKEN_JIGSAW_BROKEN_JIGSAW_SWAPL: OnceCell<BrokenJigsawbrokenjigsaw_swap> =
     OnceCell::const_new();
 static FRANKENHEAD_PREDICTOR: OnceCell<FrankenheadPredictor> = OnceCell::const_new();
+static COUNTING_PREDICTOR: OnceCell<CountingPredictor> = OnceCell::const_new();
 
 /// Predictor trait
 pub trait Predictor: Send + Sync {
@@ -56,6 +58,7 @@ pub fn init_predictor(args: &BootArgs) -> Result<()> {
         BrokenJigsawbrokenjigsaw_swap::new(args)
     })?;
     set_predictor(&FRANKENHEAD_PREDICTOR, || FrankenheadPredictor::new(args))?;
+    set_predictor(&COUNTING_PREDICTOR, || CountingPredictor::new(args))?;
     Ok(())
 }
 
@@ -74,6 +77,7 @@ pub fn get_predictor(model_type: ModelType) -> Result<&'static dyn Predictor> {
             get_predictor_from_cell(&BROKEN_JIGSAW_BROKEN_JIGSAW_SWAPL)?
         }
         ModelType::Frankenhead => get_predictor_from_cell(&FRANKENHEAD_PREDICTOR)?,
+        ModelType::Counting => get_predictor_from_cell(&COUNTING_PREDICTOR)?,
     };
     Ok(predictor)
 }
@@ -109,6 +113,7 @@ pub enum ModelType {
     #[allow(non_camel_case_types)]
     BrokenJigsawbrokenjigsaw_swap,
     Frankenhead,
+    Counting,
 }
 
 impl<'de> Deserialize<'de> for ModelType {
@@ -128,6 +133,7 @@ impl<'de> Deserialize<'de> for ModelType {
             "shadows" => Ok(ModelType::Shadows),
             "BrokenJigsawbrokenjigsaw_swap" => Ok(ModelType::BrokenJigsawbrokenjigsaw_swap),
             "frankenhead" => Ok(ModelType::Frankenhead),
+            "counting" => Ok(ModelType::Counting),
             // fallback to M3dRollballObjects
             _ => Ok(ModelType::M3dRollballObjects),
         }
