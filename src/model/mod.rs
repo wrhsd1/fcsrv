@@ -10,6 +10,7 @@ mod hopscotch_highsec;
 mod image_processing;
 mod m3d_rollball_objects;
 mod penguin;
+mod penguins_icon;
 mod rockstack;
 mod shadows;
 mod train_coordinates;
@@ -19,8 +20,8 @@ use self::{
     cardistance::CardistancePredictor, coordinatesmatch::CoordinatesMatchPredictor,
     counting::CountingPredictor, frankenhead::FrankenheadPredictor,
     hopscotch_highsec::HopscotchHighsecPredictor, m3d_rollball_objects::M3DRotationPredictor,
-    penguin::PenguinPredictor, rockstack::RockstackPredictor, shadows::ShadowsPredictor,
-    train_coordinates::TrainCoordinatesPredictor,
+    penguin::PenguinPredictor, penguins_icon::PenguinsIconPredictor, rockstack::RockstackPredictor,
+    shadows::ShadowsPredictor, train_coordinates::TrainCoordinatesPredictor,
 };
 use crate::BootArgs;
 use anyhow::Result;
@@ -41,6 +42,7 @@ static COUNTING_PREDICTOR: OnceCell<CountingPredictor> = OnceCell::const_new();
 static CARD_PREDICTOR: OnceCell<CardPredictor> = OnceCell::const_new();
 static ROCKSTACK_PREDICTOR: OnceCell<RockstackPredictor> = OnceCell::const_new();
 static CARDISTANCE_PREDICTOR: OnceCell<CardistancePredictor> = OnceCell::const_new();
+static PENGUINS_ICON_PREDICTOR: OnceCell<PenguinsIconPredictor> = OnceCell::const_new();
 
 /// Predictor trait
 pub trait Predictor: Send + Sync {
@@ -69,6 +71,9 @@ pub fn init_predictor(args: &BootArgs) -> Result<()> {
     set_predictor(&CARD_PREDICTOR, || CardPredictor::new(args))?;
     set_predictor(&ROCKSTACK_PREDICTOR, || RockstackPredictor::new(args))?;
     set_predictor(&CARDISTANCE_PREDICTOR, || CardistancePredictor::new(args))?;
+    set_predictor(&PENGUINS_ICON_PREDICTOR, || {
+        PenguinsIconPredictor::new(args)
+    })?;
     Ok(())
 }
 
@@ -91,6 +96,7 @@ pub fn get_predictor(model_type: ModelType) -> Result<&'static dyn Predictor> {
         ModelType::Card => get_predictor_from_cell(&CARD_PREDICTOR)?,
         ModelType::Rockstack => get_predictor_from_cell(&ROCKSTACK_PREDICTOR)?,
         ModelType::Cardistance => get_predictor_from_cell(&CARDISTANCE_PREDICTOR)?,
+        ModelType::PenguinsIcon => get_predictor_from_cell(&PENGUINS_ICON_PREDICTOR)?,
     };
     Ok(predictor)
 }
@@ -130,6 +136,7 @@ pub enum ModelType {
     Card,
     Rockstack,
     Cardistance,
+    PenguinsIcon,
 }
 
 impl<'de> Deserialize<'de> for ModelType {
@@ -153,6 +160,7 @@ impl<'de> Deserialize<'de> for ModelType {
             "card" => Ok(ModelType::Card),
             "rockstack" => Ok(ModelType::Rockstack),
             "cardistance" => Ok(ModelType::Cardistance),
+            "penguins-icon" => Ok(ModelType::PenguinsIcon),
             // fallback to M3dRollballObjects
             _ => Ok(ModelType::M3dRollballObjects),
         }
