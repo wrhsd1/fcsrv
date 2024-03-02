@@ -21,6 +21,7 @@ Currently supports the following models:
 - `train_coordinates`
 - `penguin`
 - `shadows`
+- `BrokenJigsawbrokenjigsaw_swapl`
 
 ### Usage
 
