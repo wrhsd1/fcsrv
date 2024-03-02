@@ -17,15 +17,15 @@ fn main() {
     })
     .unwrap();
 
-    let predictor = fcsrv::model::get_predictor(ModelType::Card).unwrap();
+    let predictor = fcsrv::model::get_predictor(ModelType::Rockstack).unwrap();
 
-    let image_file = std::fs::read("images/card/card_1.jpg").unwrap();
+    let image_file = std::fs::read("images/rockstack/9258513.jpg").unwrap();
     let guess = predictor
         .predict(image::load_from_memory(&image_file).unwrap())
         .unwrap();
-    assert_eq!(guess, 0);
+    assert_eq!(guess, 3);
 
-    let image_file = std::fs::read("images/card/card_2.jpg").unwrap();
+    let image_file = std::fs::read("images/rockstack/50444558.jpg").unwrap();
     let guess = predictor
         .predict(image::load_from_memory(&image_file).unwrap())
         .unwrap();

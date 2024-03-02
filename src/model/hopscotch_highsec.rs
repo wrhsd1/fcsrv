@@ -11,6 +11,7 @@ impl HopscotchHighsecPredictor {
         Ok(Self(ImagePairClassifierPredictor::new(
             "hopscotch_highsec.onnx",
             args,
+            false,
         )?))
     }
 }

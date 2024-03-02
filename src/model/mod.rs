@@ -1,6 +1,7 @@
 mod base;
 #[allow(non_snake_case)]
 mod brokenJigsawbrokenjigsaw_swap;
+mod card;
 mod coordinatesmatch;
 mod counting;
 mod frankenhead;
@@ -8,16 +9,17 @@ mod hopscotch_highsec;
 mod image_processing;
 mod m3d_rollball_objects;
 mod penguin;
+mod rockstack;
 mod shadows;
 mod train_coordinates;
-mod card;
 
 use self::{
-    brokenJigsawbrokenjigsaw_swap::BrokenJigsawbrokenjigsaw_swap,
+    brokenJigsawbrokenjigsaw_swap::BrokenJigsawbrokenjigsaw_swap, card::CardPredictor,
     coordinatesmatch::CoordinatesMatchPredictor, counting::CountingPredictor,
     frankenhead::FrankenheadPredictor, hopscotch_highsec::HopscotchHighsecPredictor,
     m3d_rollball_objects::M3DRotationPredictor, penguin::PenguinPredictor,
-    shadows::ShadowsPredictor, train_coordinates::TrainCoordinatesPredictor,
+    rockstack::RockstackPredictor, shadows::ShadowsPredictor,
+    train_coordinates::TrainCoordinatesPredictor,
 };
 use crate::BootArgs;
 use anyhow::Result;
@@ -35,7 +37,8 @@ static BROKEN_JIGSAW_BROKEN_JIGSAW_SWAPL: OnceCell<BrokenJigsawbrokenjigsaw_swap
     OnceCell::const_new();
 static FRANKENHEAD_PREDICTOR: OnceCell<FrankenheadPredictor> = OnceCell::const_new();
 static COUNTING_PREDICTOR: OnceCell<CountingPredictor> = OnceCell::const_new();
-static CARD_PREDICTOR: OnceCell<card::CardPredictor> = OnceCell::const_new();
+static CARD_PREDICTOR: OnceCell<CardPredictor> = OnceCell::const_new();
+static ROCKSTACK_PREDICTOR: OnceCell<RockstackPredictor> = OnceCell::const_new();
 
 /// Predictor trait
 pub trait Predictor: Send + Sync {
@@ -61,7 +64,8 @@ pub fn init_predictor(args: &BootArgs) -> Result<()> {
     })?;
     set_predictor(&FRANKENHEAD_PREDICTOR, || FrankenheadPredictor::new(args))?;
     set_predictor(&COUNTING_PREDICTOR, || CountingPredictor::new(args))?;
-    set_predictor(&CARD_PREDICTOR, || card::CardPredictor::new(args))?;
+    set_predictor(&CARD_PREDICTOR, || CardPredictor::new(args))?;
+    set_predictor(&ROCKSTACK_PREDICTOR, || RockstackPredictor::new(args))?;
     Ok(())
 }
 
@@ -82,6 +86,7 @@ pub fn get_predictor(model_type: ModelType) -> Result<&'static dyn Predictor> {
         ModelType::Frankenhead => get_predictor_from_cell(&FRANKENHEAD_PREDICTOR)?,
         ModelType::Counting => get_predictor_from_cell(&COUNTING_PREDICTOR)?,
         ModelType::Card => get_predictor_from_cell(&CARD_PREDICTOR)?,
+        ModelType::Rockstack => get_predictor_from_cell(&ROCKSTACK_PREDICTOR)?,
     };
     Ok(predictor)
 }
@@ -119,6 +124,7 @@ pub enum ModelType {
     Frankenhead,
     Counting,
     Card,
+    Rockstack,
 }
 
 impl<'de> Deserialize<'de> for ModelType {
@@ -140,6 +146,7 @@ impl<'de> Deserialize<'de> for ModelType {
             "frankenhead" => Ok(ModelType::Frankenhead),
             "counting" => Ok(ModelType::Counting),
             "card" => Ok(ModelType::Card),
+            "rockstack" => Ok(ModelType::Rockstack),
             // fallback to M3dRollballObjects
             _ => Ok(ModelType::M3dRollballObjects),
         }

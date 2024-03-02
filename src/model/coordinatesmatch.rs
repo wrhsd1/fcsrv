@@ -11,6 +11,7 @@ impl CoordinatesMatchPredictor {
         Ok(Self(ImagePairClassifierPredictor::new(
             "coordinatesmatch.onnx",
             args,
+            false,
         )?))
     }
 }
