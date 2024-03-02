@@ -8,6 +8,7 @@ mod counting;
 mod frankenhead;
 mod hopscotch_highsec;
 mod image_processing;
+mod knots_crosses_circle;
 mod m3d_rollball_objects;
 mod penguin;
 mod penguins_icon;
@@ -19,7 +20,8 @@ use self::{
     brokenJigsawbrokenjigsaw_swap::BrokenJigsawbrokenjigsaw_swap, card::CardPredictor,
     cardistance::CardistancePredictor, coordinatesmatch::CoordinatesMatchPredictor,
     counting::CountingPredictor, frankenhead::FrankenheadPredictor,
-    hopscotch_highsec::HopscotchHighsecPredictor, m3d_rollball_objects::M3DRotationPredictor,
+    hopscotch_highsec::HopscotchHighsecPredictor,
+    knots_crosses_circle::KnotsCrossesCirclePredictor, m3d_rollball_objects::M3DRotationPredictor,
     penguin::PenguinPredictor, penguins_icon::PenguinsIconPredictor, rockstack::RockstackPredictor,
     shadows::ShadowsPredictor, train_coordinates::TrainCoordinatesPredictor,
 };
@@ -43,6 +45,8 @@ static CARD_PREDICTOR: OnceCell<CardPredictor> = OnceCell::const_new();
 static ROCKSTACK_PREDICTOR: OnceCell<RockstackPredictor> = OnceCell::const_new();
 static CARDISTANCE_PREDICTOR: OnceCell<CardistancePredictor> = OnceCell::const_new();
 static PENGUINS_ICON_PREDICTOR: OnceCell<PenguinsIconPredictor> = OnceCell::const_new();
+static KNOTS_CROSSES_CIRCLE_PREDICTOR: OnceCell<KnotsCrossesCirclePredictor> =
+    OnceCell::const_new();
 
 /// Predictor trait
 pub trait Predictor: Send + Sync {
@@ -74,6 +78,9 @@ pub fn init_predictor(args: &BootArgs) -> Result<()> {
     set_predictor(&PENGUINS_ICON_PREDICTOR, || {
         PenguinsIconPredictor::new(args)
     })?;
+    set_predictor(&KNOTS_CROSSES_CIRCLE_PREDICTOR, || {
+        KnotsCrossesCirclePredictor::new(args)
+    })?;
     Ok(())
 }
 
@@ -97,6 +104,7 @@ pub fn get_predictor(model_type: ModelType) -> Result<&'static dyn Predictor> {
         ModelType::Rockstack => get_predictor_from_cell(&ROCKSTACK_PREDICTOR)?,
         ModelType::Cardistance => get_predictor_from_cell(&CARDISTANCE_PREDICTOR)?,
         ModelType::PenguinsIcon => get_predictor_from_cell(&PENGUINS_ICON_PREDICTOR)?,
+        ModelType::KnotsCrossesCircle => get_predictor_from_cell(&KNOTS_CROSSES_CIRCLE_PREDICTOR)?,
     };
     Ok(predictor)
 }
@@ -137,6 +145,7 @@ pub enum ModelType {
     Rockstack,
     Cardistance,
     PenguinsIcon,
+    KnotsCrossesCircle,
 }
 
 impl<'de> Deserialize<'de> for ModelType {
@@ -161,6 +170,7 @@ impl<'de> Deserialize<'de> for ModelType {
             "rockstack" => Ok(ModelType::Rockstack),
             "cardistance" => Ok(ModelType::Cardistance),
             "penguins-icon" => Ok(ModelType::PenguinsIcon),
+            "knotsCrossesCircle" => Ok(ModelType::KnotsCrossesCircle),
             // fallback to M3dRollballObjects
             _ => Ok(ModelType::M3dRollballObjects),
         }
