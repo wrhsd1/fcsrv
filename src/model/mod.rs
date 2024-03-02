@@ -10,6 +10,7 @@ mod m3d_rollball_objects;
 mod penguin;
 mod shadows;
 mod train_coordinates;
+mod card;
 
 use self::{
     brokenJigsawbrokenjigsaw_swap::BrokenJigsawbrokenjigsaw_swap,
@@ -34,6 +35,7 @@ static BROKEN_JIGSAW_BROKEN_JIGSAW_SWAPL: OnceCell<BrokenJigsawbrokenjigsaw_swap
     OnceCell::const_new();
 static FRANKENHEAD_PREDICTOR: OnceCell<FrankenheadPredictor> = OnceCell::const_new();
 static COUNTING_PREDICTOR: OnceCell<CountingPredictor> = OnceCell::const_new();
+static CARD_PREDICTOR: OnceCell<card::CardPredictor> = OnceCell::const_new();
 
 /// Predictor trait
 pub trait Predictor: Send + Sync {
@@ -59,6 +61,7 @@ pub fn init_predictor(args: &BootArgs) -> Result<()> {
     })?;
     set_predictor(&FRANKENHEAD_PREDICTOR, || FrankenheadPredictor::new(args))?;
     set_predictor(&COUNTING_PREDICTOR, || CountingPredictor::new(args))?;
+    set_predictor(&CARD_PREDICTOR, || card::CardPredictor::new(args))?;
     Ok(())
 }
 
@@ -78,6 +81,7 @@ pub fn get_predictor(model_type: ModelType) -> Result<&'static dyn Predictor> {
         }
         ModelType::Frankenhead => get_predictor_from_cell(&FRANKENHEAD_PREDICTOR)?,
         ModelType::Counting => get_predictor_from_cell(&COUNTING_PREDICTOR)?,
+        ModelType::Card => get_predictor_from_cell(&CARD_PREDICTOR)?,
     };
     Ok(predictor)
 }
@@ -114,6 +118,7 @@ pub enum ModelType {
     BrokenJigsawbrokenjigsaw_swap,
     Frankenhead,
     Counting,
+    Card,
 }
 
 impl<'de> Deserialize<'de> for ModelType {
@@ -134,6 +139,7 @@ impl<'de> Deserialize<'de> for ModelType {
             "BrokenJigsawbrokenjigsaw_swap" => Ok(ModelType::BrokenJigsawbrokenjigsaw_swap),
             "frankenhead" => Ok(ModelType::Frankenhead),
             "counting" => Ok(ModelType::Counting),
+            "card" => Ok(ModelType::Card),
             // fallback to M3dRollballObjects
             _ => Ok(ModelType::M3dRollballObjects),
         }
