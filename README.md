@@ -23,6 +23,8 @@ Currently supports the following models:
 - `shadows`
 - `BrokenJigsawbrokenjigsaw_swapl`
 - `frankenhead`
+- `counting`
+- `card`
 
 ### Usage
 
