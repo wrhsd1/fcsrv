@@ -1,4 +1,6 @@
 mod base;
+#[allow(non_snake_case)]
+mod brokenJigsawbrokenjigsaw_swap;
 mod coordinatesmatch;
 mod hopscotch_highsec;
 mod image_processing;
@@ -8,6 +10,7 @@ mod shadows;
 mod train_coordinates;
 
 use self::{
+    brokenJigsawbrokenjigsaw_swap::BrokenJigsawbrokenjigsaw_swap,
     coordinatesmatch::CoordinatesMatchPredictor, hopscotch_highsec::HopscotchHighsecPredictor,
     m3d_rollball_objects::M3DRotationPredictor, penguin::PenguinPredictor,
     shadows::ShadowsPredictor, train_coordinates::TrainCoordinatesPredictor,
@@ -24,6 +27,8 @@ static HOPSCOTCH_HIGHSEC_PREDICTOR: OnceCell<HopscotchHighsecPredictor> = OnceCe
 static TRAIN_COORDINATES_PREDICTOR: OnceCell<TrainCoordinatesPredictor> = OnceCell::const_new();
 static PENGUIN_PREDICTOR: OnceCell<PenguinPredictor> = OnceCell::const_new();
 static SHADOWS_PREDICTOR: OnceCell<ShadowsPredictor> = OnceCell::const_new();
+static BROKEN_JIGSAW_BROKEN_JIGSAW_SWAPL: OnceCell<BrokenJigsawbrokenjigsaw_swap> =
+    OnceCell::const_new();
 
 /// Predictor trait
 pub trait Predictor: Send + Sync {
@@ -44,6 +49,9 @@ pub fn init_predictor(args: &BootArgs) -> Result<()> {
     })?;
     set_predictor(&PENGUIN_PREDICTOR, || PenguinPredictor::new(args))?;
     set_predictor(&SHADOWS_PREDICTOR, || ShadowsPredictor::new(args))?;
+    set_predictor(&BROKEN_JIGSAW_BROKEN_JIGSAW_SWAPL, || {
+        BrokenJigsawbrokenjigsaw_swap::new(args)
+    })?;
     Ok(())
 }
 
@@ -58,6 +66,9 @@ pub fn get_predictor(model_type: ModelType) -> Result<&'static dyn Predictor> {
         ModelType::TrainCoordinates => get_predictor_from_cell(&TRAIN_COORDINATES_PREDICTOR)?,
         ModelType::Penguin => get_predictor_from_cell(&PENGUIN_PREDICTOR)?,
         ModelType::Shadows => get_predictor_from_cell(&SHADOWS_PREDICTOR)?,
+        ModelType::BrokenJigsawbrokenjigsaw_swap => {
+            get_predictor_from_cell(&BROKEN_JIGSAW_BROKEN_JIGSAW_SWAPL)?
+        }
     };
     Ok(predictor)
 }
@@ -90,6 +101,8 @@ pub enum ModelType {
     TrainCoordinates,
     Penguin,
     Shadows,
+    #[allow(non_camel_case_types)]
+    BrokenJigsawbrokenjigsaw_swap,
 }
 
 impl<'de> Deserialize<'de> for ModelType {
@@ -107,18 +120,9 @@ impl<'de> Deserialize<'de> for ModelType {
             "train_coordinates" => Ok(ModelType::TrainCoordinates),
             "penguin" => Ok(ModelType::Penguin),
             "shadows" => Ok(ModelType::Shadows),
-            _ => Err(serde::de::Error::unknown_variant(
-                &s,
-                &[
-                    "3d_rollball_animals",
-                    "3d_rollball_objects",
-                    "coordinatesmatch",
-                    "hopscotch_highsec",
-                    "train_coordinates",
-                    "penguin",
-                    "shadows",
-                ],
-            )),
+            "BrokenJigsawbrokenjigsaw_swap" => Ok(ModelType::BrokenJigsawbrokenjigsaw_swap),
+            // fallback to M3dRollballObjects
+            _ => Ok(ModelType::M3dRollballObjects),
         }
     }
 }

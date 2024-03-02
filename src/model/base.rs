@@ -4,6 +4,7 @@ use ndarray::Array4;
 use ort::{GraphOptimizationLevel, Session};
 use sha2::Digest;
 use sha2::Sha256;
+use std::sync::OnceLock;
 use std::{
     collections::HashMap,
     f32, fs,
@@ -18,6 +19,8 @@ use super::image_processing::check_input_image_size;
 use super::image_processing::process_classifier_image;
 use super::image_processing::process_pair_classifier_ans_image;
 use super::image_processing::process_pair_classifier_image;
+
+static INIT_VERSION: OnceLock<()> = OnceLock::new();
 
 pub struct ImagePairClassifierPredictor(Session);
 pub struct ImageClassifierPredictor(Session);
@@ -122,6 +125,15 @@ fn create_model_session(onnx: &'static str, args: &BootArgs) -> Result<Session> 
                 .unwrap_or(PathBuf::new())
                 .join(".funcaptcha_models")
         });
+
+    if INIT_VERSION.get().is_none() {
+        // check version.json is exist
+        if model_dir.join("version.json").exists() {
+            // delete version.json
+            fs::remove_file(model_dir.join("version.json"))?;
+        }
+        let _ = INIT_VERSION.set(());
+    }
 
     let model_file = initialize_model(onnx, model_dir, args.update_check)?;
     let session = Session::builder()?
