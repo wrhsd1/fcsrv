@@ -5,6 +5,7 @@ mod card;
 mod cardistance;
 mod coordinatesmatch;
 mod counting;
+mod dicematch;
 mod frankenhead;
 mod hand_number_puzzle;
 mod hopscotch_highsec;
@@ -20,8 +21,9 @@ mod train_coordinates;
 use self::{
     brokenJigsawbrokenjigsaw_swap::BrokenJigsawbrokenjigsaw_swap, card::CardPredictor,
     cardistance::CardistancePredictor, coordinatesmatch::CoordinatesMatchPredictor,
-    counting::CountingPredictor, frankenhead::FrankenheadPredictor,
-    hand_number_puzzle::HandNumberPuzzlePredictor, hopscotch_highsec::HopscotchHighsecPredictor,
+    counting::CountingPredictor, dicematch::DicematchMatchPredictor,
+    frankenhead::FrankenheadPredictor, hand_number_puzzle::HandNumberPuzzlePredictor,
+    hopscotch_highsec::HopscotchHighsecPredictor,
     knots_crosses_circle::KnotsCrossesCirclePredictor, m3d_rollball_objects::M3DRotationPredictor,
     penguin::PenguinPredictor, penguins_icon::PenguinsIconPredictor, rockstack::RockstackPredictor,
     shadows::ShadowsPredictor, train_coordinates::TrainCoordinatesPredictor,
@@ -49,6 +51,7 @@ static PENGUINS_ICON_PREDICTOR: OnceCell<PenguinsIconPredictor> = OnceCell::cons
 static KNOTS_CROSSES_CIRCLE_PREDICTOR: OnceCell<KnotsCrossesCirclePredictor> =
     OnceCell::const_new();
 static HAND_NUMBER_PUZZLE_PREDICTOR: OnceCell<HandNumberPuzzlePredictor> = OnceCell::const_new();
+static DICEMATCH_PREDICTOR: OnceCell<DicematchMatchPredictor> = OnceCell::const_new();
 
 /// Predictor trait
 pub trait Predictor: Send + Sync {
@@ -86,6 +89,7 @@ pub fn init_predictor(args: &BootArgs) -> Result<()> {
     set_predictor(&HAND_NUMBER_PUZZLE_PREDICTOR, || {
         HandNumberPuzzlePredictor::new(args)
     })?;
+    set_predictor(&DICEMATCH_PREDICTOR, || DicematchMatchPredictor::new(args))?;
     Ok(())
 }
 
@@ -111,6 +115,7 @@ pub fn get_predictor(model_type: ModelType) -> Result<&'static dyn Predictor> {
         ModelType::PenguinsIcon => get_predictor_from_cell(&PENGUINS_ICON_PREDICTOR)?,
         ModelType::KnotsCrossesCircle => get_predictor_from_cell(&KNOTS_CROSSES_CIRCLE_PREDICTOR)?,
         ModelType::HandNumberPuzzle => get_predictor_from_cell(&HAND_NUMBER_PUZZLE_PREDICTOR)?,
+        ModelType::Dicematch => get_predictor_from_cell(&DICEMATCH_PREDICTOR)?,
     };
     Ok(predictor)
 }
@@ -153,6 +158,7 @@ pub enum ModelType {
     PenguinsIcon,
     KnotsCrossesCircle,
     HandNumberPuzzle,
+    Dicematch,
 }
 
 impl<'de> Deserialize<'de> for ModelType {
@@ -179,6 +185,7 @@ impl<'de> Deserialize<'de> for ModelType {
             "penguins-icon" => Ok(ModelType::PenguinsIcon),
             "knotsCrossesCircle" => Ok(ModelType::KnotsCrossesCircle),
             "hand_number_puzzle" => Ok(ModelType::HandNumberPuzzle),
+            "dicematch" => Ok(ModelType::Dicematch),
             // fallback to M3dRollballObjects
             _ => Ok(ModelType::M3dRollballObjects),
         }
