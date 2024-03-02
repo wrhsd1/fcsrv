@@ -11,6 +11,7 @@ impl M3DRotationPredictor {
         Ok(Self(ImagePairClassifierPredictor::new(
             "3d_rollball_objects_v2.onnx",
             args,
+            false,
         )?))
     }
 }

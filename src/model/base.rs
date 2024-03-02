@@ -22,13 +22,13 @@ use super::image_processing::process_pair_classifier_image;
 
 static INIT_VERSION: OnceLock<()> = OnceLock::new();
 
-pub struct ImagePairClassifierPredictor(Session);
+pub struct ImagePairClassifierPredictor((Session, bool));
 pub struct ImageClassifierPredictor(Session);
 
 impl ImagePairClassifierPredictor {
     /// Create a new instance of the ImagePairClassifierPredictor
-    pub fn new(onnx: &'static str, args: &BootArgs) -> Result<Self> {
-        Ok(Self(create_model_session(onnx, args)?))
+    pub fn new(onnx: &'static str, args: &BootArgs, is_grayscale: bool) -> Result<Self> {
+        Ok(Self((create_model_session(onnx, args)?, is_grayscale)))
     }
 }
 
@@ -47,7 +47,7 @@ impl ImagePairClassifierPredictor {
             "input_right" => right,
         }?;
 
-        let outputs = self.0.run(inputs)?;
+        let outputs = self.0 .0.run(inputs)?;
         let output = outputs[0]
             .extract_tensor::<f32>()?
             .view()
@@ -65,10 +65,10 @@ impl ImagePairClassifierPredictor {
         let mut max_prediction = f32::NEG_INFINITY;
         let width = image.width();
         let mut max_index = 0;
-        let left = process_pair_classifier_ans_image(&mut image, (52, 52))?;
+        let left = process_pair_classifier_ans_image(&mut image, (52, 52), self.0 .1)?;
 
         for i in 0..(width / 200) {
-            let right = process_pair_classifier_image(&image, (0, i), (52, 52))?;
+            let right = process_pair_classifier_image(&image, (0, i), (52, 52), self.0 .1)?;
             let prediction = self.run_prediction(left.clone(), right)?;
             let prediction_value = prediction[0];
             if prediction_value > max_prediction {

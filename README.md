@@ -25,6 +25,11 @@ Currently supports the following models:
 - `frankenhead`
 - `counting`
 - `card`
+- `rockstack`
+- `cardistance`
+- `penguins-icon`
+- `knotsCrossesCircle`
+- `hand_number_puzzle`
 
 ### Usage
 

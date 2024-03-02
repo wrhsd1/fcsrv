@@ -3,20 +3,20 @@ use crate::BootArgs;
 use anyhow::Result;
 use image::DynamicImage;
 
-pub struct TrainCoordinatesPredictor(ImagePairClassifierPredictor);
+pub struct RockstackPredictor(ImagePairClassifierPredictor);
 
-impl TrainCoordinatesPredictor {
-    /// Create a new instance of the TrainCoordinatesPredictor
+impl RockstackPredictor {
+    /// Create a new instance of the RockstackPredictor
     pub fn new(args: &BootArgs) -> Result<Self> {
         Ok(Self(ImagePairClassifierPredictor::new(
-            "train_coordinates.onnx",
+            "rockstack_v2.onnx",
             args,
-            false,
+            true,
         )?))
     }
 }
 
-impl Predictor for TrainCoordinatesPredictor {
+impl Predictor for RockstackPredictor {
     fn predict(&self, image: DynamicImage) -> Result<i32> {
         self.0.predict(image)
     }

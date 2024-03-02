@@ -12,6 +12,7 @@ impl BrokenJigsawbrokenjigsaw_swap {
         Ok(Self(ImagePairClassifierPredictor::new(
             "BrokenJigsawbrokenjigsaw_swap.onnx",
             args,
+            false,
         )?))
     }
 }
