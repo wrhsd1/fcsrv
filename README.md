@@ -30,6 +30,7 @@ Currently supports the following models:
 - `penguins-icon`
 - `knotsCrossesCircle`
 - `hand_number_puzzle`
+- `dicematch`
 
 ### Usage
 
